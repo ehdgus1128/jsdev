@@ -1,0 +1,186 @@
+# JavaScript Interview Question - 배열 전달 방식
+
+## 문제
+
+```javascript
+function doSomething(val) {
+  val.push(6);
+}
+
+const arr = [1, 2, 3, 4, 5];
+
+doSomething(arr);
+
+console.log(arr);
+```
+
+### 출력 결과는?
+
+- A. `[1, 2, 3, 4, 5, 6]`
+- B. `[1, 2, 3, 4, 5]`
+- C. Error
+- D. None of these
+
+---
+
+# 정답
+
+✅ **A. `[1, 2, 3, 4, 5, 6]`**
+
+---
+
+# 이유
+
+배열(Array)은 **객체(Object)** 입니다.
+
+함수에 배열을 전달하면 **배열 자체가 복사되는 것이 아니라 같은 배열을 가리키는 참조값(reference)이 전달**됩니다.
+
+```javascript
+function doSomething(val) {
+  val.push(6);
+}
+```
+
+`push()`는 새로운 배열을 생성하는 메서드가 아니라 **기존 배열을 직접 수정(Mutable)** 하는 메서드입니다.
+
+따라서 `val`이 수정되면 원본인 `arr`도 함께 변경됩니다.
+
+```
+arr
+ │
+ ▼
+[1,2,3,4,5]
+
+↓
+
+val
+ │
+ ▼
+같은 배열
+
+↓
+
+val.push(6)
+
+↓
+
+arr
+ │
+ ▼
+[1,2,3,4,5,6]
+```
+
+---
+
+# JavaScript는 참조 전달(Pass by Reference)인가?
+
+많이 오해하는 부분입니다.
+
+**아닙니다.**
+
+JavaScript는 **모든 값을 Pass by Value(값에 의한 전달)** 로 전달합니다.
+
+다만 객체(Array, Object, Function)는 **참조값(reference)을 값으로 복사해서 전달**합니다.
+
+즉,
+
+```
+Pass by Value
+        ↓
+참조값 자체를 복사
+        ↓
+둘 다 같은 객체를 가리킴
+```
+
+그래서 객체 내부를 수정하면 원본도 변경됩니다.
+
+---
+
+# 변수 자체를 변경하면?
+
+객체를 수정하는 것이 아니라 **매개변수에 새로운 배열을 할당**하면 원본은 변경되지 않습니다.
+
+```javascript
+function doSomething(val) {
+  val = [10, 20, 30];
+}
+
+const arr = [1, 2, 3, 4, 5];
+
+doSomething(arr);
+
+console.log(arr);
+```
+
+### 결과
+
+```javascript
+[1, 2, 3, 4, 5]
+```
+
+이유는 `val`만 새로운 배열을 가리키게 되었고,
+
+`arr`은 여전히 기존 배열을 가리키기 때문입니다.
+
+```
+처음
+
+arr ─────┐
+         ▼
+     [1,2,3,4,5]
+         ▲
+val ─────┘
+
+↓
+
+val = [10,20,30]
+
+arr ─────────► [1,2,3,4,5]
+
+val ─────────► [10,20,30]
+```
+
+---
+
+# const인데 왜 push가 가능할까?
+
+`const`는 **변수 재할당(reassignment)을 막는 것**입니다.
+
+객체 내부 변경까지 막지는 않습니다.
+
+가능한 것
+
+```javascript
+const arr = [1,2,3];
+
+arr.push(4);
+
+arr[0] = 100;
+```
+
+불가능한 것
+
+```javascript
+const arr = [1,2,3];
+
+arr = [];
+// TypeError
+```
+
+---
+
+# 핵심 정리
+
+| 코드 | 원본 변경 |
+|------|-----------|
+| `arr.push(6)` | ✅ |
+| `arr[0] = 100` | ✅ |
+| `val.push(6)` | ✅ |
+| `val = []` | ❌ (원본 유지) |
+| `arr = []` (`const`) | ❌ Error |
+
+---
+
+# 한 줄 요약
+
+> **JavaScript는 Pass by Value를 사용하지만, 객체(Array/Object)는 참조값을 값으로 복사하여 전달하므로 객체 내부를 수정하면 원본도 함께 변경된다.**
